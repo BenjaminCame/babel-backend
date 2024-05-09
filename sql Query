@@ -1,0 +1,14 @@
+CREATE TABLE japanese (
+	english  varchar(255),
+	japanese varchar(255) 
+);
+
+CREATE TABLE espanol (
+	english varchar(255),
+	espanol varchar(255)
+);
+
+CREATE TABLE svenska (
+	english varchar(255),
+	svenska varchar(255)
+);
