@@ -12,6 +12,7 @@ const client = new Client ({
     username: 'polygot',
     database: 'babel'
 })
+CacheStorage
 
 const bensServer = http.createServer((req, res) => {
     const parsedURL = url.parse(req.url, true);
