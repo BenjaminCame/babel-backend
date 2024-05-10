@@ -12,19 +12,16 @@ const client = new Client ({
     username: 'polygot',
     database: 'babel'
 })
-CacheStorage
 
 const bensServer = http.createServer((req, res) => {
     const parsedURL = url.parse(req.url, true);
-    
     //handel requests
     if (req.method === 'GET'){
-        handelGetRequests(req, res, parsedURL)
+        handelGetRequests(parsedURL)
     }
 });
 
 bensServer.on("request", (req, res) => {
-    console.log(req);
     res.write("got request!!!")
     res.end()
 })
@@ -34,17 +31,12 @@ bensServer.on('connection', connection =>{
 bensServer.listen(8080, ()=>console.log("listening on 8080"))
 
 
-async function handelGetRequests = (req, res, parsedURL) => {
-    console.log("this is req" + req)
-    console.log("this is res" + res)
+async function handelGetRequests (parsedURL) {
     if (parsedURL.path === "/japanese"){
-        req = await getTable(req, "japanese")
-        console.log(res)
-        // var temp = await client.query('SELECT * FROM japanese')
-        // console.log(temp)
-        // res.write(temp.rows[0])
+        console.log("successgully passed handel request")
+        temp = await getTable("japanese")
         sendResponse(res, 200, CONTENT_TYPE_JSON, temp);
-        console.log("yoyoyo this got called" + temp)
+        // console.log("yoyoyo this got called" + temp)
     } else {
         console.log("nothing to see here!!")
     }
@@ -55,17 +47,19 @@ const sendResponse = (res, statusCode, contentType, data) => {
     res.end(JSON.stringify(data));
 };
 
-async function getTable(res, table){
-    res = await client.query('SELECT * FROM' + table)
-    console.log("select * from ${table}")
-    console.log("yoyoyo this got called" + res.rows[0])
-
+async function getTable(table){
+    console.log("get table")
+    client.connect()
+    var ans = await client.query('SELECT * FROM ' + table)
+    console.log(ans.rows[0])
+    // console.log("yoyoyo this got called" + res.rows[0])
 }   
 
 async function connectSQL() {
 
     client.connect()
-
+    // var benstest = await getTable("japanese")
+    // console.log(benstest)
     var test = await client.query('SELECT * FROM japanese, svenska, espanol;')
     console.log(test.rows[0])
 
@@ -73,6 +67,5 @@ async function connectSQL() {
     console.log(temp.rows[0])
 
 }
-
 
 connectSQL()
