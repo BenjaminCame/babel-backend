@@ -7,10 +7,19 @@
   },
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.19.2",
     "nodejs": "^0.0.0",
     "pg": "^8.11.5"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BenjaminCame/babel-backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BenjaminCame/babel-backend/issues"
+  },
+  "homepage": "https://github.com/BenjaminCame/babel-backend#readme",
+  "description": ""
 }
