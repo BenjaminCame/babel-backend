@@ -44,16 +44,22 @@ bensServer.listen(8080, ()=>console.log("listening on 8080"))
 
 async function handelGetRequests (parsedURL) {
     //TODO this is working in the current form, but how can i dynamically add a table from the application
+    if (parsedURL === "/addtable"){
+        temp = await createTable()
+        return temp
+    }
+
+    if (parsedURL === "/addphrase"){
+        temp = await createPhrase()
+    }
+
     if (parsedURL === "/japanese"){
-        console.log("successgully passed handel request")
         temp = await getTable("japanese")
 	return temp
     } else if(parsedURL === "/svenska"){
-        console.log("successgully passed handel request")
         temp = await getTable("svenska")
         return temp
     } else if(parsedURL === "/espanol"){
-        console.log("successgully passed handel request")
         temp = await getTable("espanol")
         return temp
     } else {
@@ -71,5 +77,18 @@ async function getTable(table){
     return ans;
 }   
 
+async function createTable(tablename){
+    client = await pool.connect()
+    console.log("NODE js createTable")
+    await client.query('CREATE TABLE' + tablename)//this is psudo sql query 
+    client.release()
+}
+
+async function createPhrase(table, native, target){
+    client = await pool.connect()
+    console.log("adding" + native + target + " to " + tabel)
+    await client.query("INSERT INTO" + tablename + " VALUES (" + natve + "," + target + ")")
+    client.release()
+}
 
 
