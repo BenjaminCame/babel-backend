@@ -1,8 +1,8 @@
-
 var pg = require('pg')
 var http = require('http');
 var cors = require('cors')
 const { error } = require('console');
+const { parse } = require('url');
 const CONTENT_TYPE_JSON = { "Content-Type": "application/json" };
 const { Pool } = pg
 
@@ -24,7 +24,8 @@ const bensServer = http.createServer((request, res) => {
       };
     //TODO need to add a (method === POST request)
     console.log(method)
-    if (method === 'GET'){
+    if (method === 'GET' || method === 'POST'){
+        console.log('this is my url', url)
         handelGetRequests(url).then(response => {
             console.log(JSON.stringify(response.rows))
             res.writeHead(200, resheaders);
@@ -42,19 +43,22 @@ const bensServer = http.createServer((request, res) => {
 bensServer.listen(8080, ()=>console.log("listening on 8080"))
 
 
+//TODO this function needs to be cleaned up, maybe made a seperate handel POST requests function
+//TODO need to clean up if staments to simplicity, potentially more pythonic methods
 async function handelGetRequests (parsedURL) {
     console.log(parsedURL)
-    if (parsedURL === "/addtable"){
-        await createTable("testnew") //TODO need to return a success/failure repsonse
-        return
-    }
+    console.log(typeof(parsedURL))
     if (parsedURL === "/getTables"){
         console.log("hello")
         temp = await getDatabase()
         console.log(temp)
         return temp
     }
-
+    if (parsedURL === "/newLangauage"){
+        console.log("adding new language")
+        temp = await createLanguageDB("mynewDB") // TODO error handel this funciton call
+        return;
+    }
     if (parsedURL === "/add/phrase"){
         console.log("this is the test")
         let body = [];
@@ -99,7 +103,8 @@ async function getTable(table){
     return ans;
 }   
 
-async function createTable(tablename){
+async function createLanguageDB(tablename){
+    console.log("this is my create language")
     client = await pool.connect()
     res = await client.query('CREATE TABLE ' + tablename +  "( native varchar(255), target varchar(255) );")
     console.log(res)
