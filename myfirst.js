@@ -1,9 +1,19 @@
 var pg = require('pg')
-var http = require('http');
+const express = require('express')
 var cors = require('cors')
-const { error } = require('console');
-const { parse } = require('url');
-const CONTENT_TYPE_JSON = { "Content-Type": "application/json" };
+const app = express()
+const port = 8080
+
+app.use(cors())
+
+const resheaders = {
+            'Access-Control-Allow-Origin': 'http://localhost:4200', /* @dev First, read about security */
+            'Access-Control-Allow-Methods': 'POST, GET, PUT',
+            'Access-Control-Max-Age': 2592000, // 30 days
+            'Access-Control-Allow-Headers':'content-type Authorization',
+            /** add other headers as per requirement */
+          };
+
 const { Pool } = pg
 
 const pool = new Pool ({
@@ -14,53 +24,48 @@ const pool = new Pool ({
     password: 'pa$$word'
 })
 
-const bensServer = http.createServer((request, res) => {
-    const { headers, method, url } = request;
-    const resheaders = {
-        'Access-Control-Allow-Origin': '*', /* @dev First, read about security */
-        'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
-        'Access-Control-Max-Age': 2592000, // 30 days
-        /** add other headers as per requirement */
-      };
-    //TODO need to add a (method === POST request)
-    console.log(method)
-    if (method === 'GET' || method === 'POST'){
-        console.log('this is my url', url)
-        handelGetRequests(url).then(response => {
-            console.log(JSON.stringify(response.rows))
-            res.writeHead(200, resheaders);
-            res.write(JSON.stringify(response.rows))
-            res.end()
-        })
-        .catch(error => {
-            console.error('ERROR! ' + error)
-        })
+app.get('*', (req, res) => {
+    const { headers, method, url } = req;
+    console.log('this is my url', url)
+    handelGetRequests(url).then(response => {
+        res.set(resheaders);
+        res.json(response.rows)
+        res.end()
+    })
+    .catch(error => {
+        console.error('ERROR! ' + error)
+    })
+})
 
+app.post('*', (req, res) => {
+    const { headers, method, url } = req;
+    console.log('this is my post request')
+    let data = '';
+    req.on('data', chunk => {
+      data += chunk.toString();
+    });
+
+
+    if (url === "/newLangauage"){
+        console.log("adding new language")
+        //temp = await createLanguageDB("mynewDB") // TODO error handel this funciton call
+        return;
     }
-});
-
-
-bensServer.listen(8080, ()=>console.log("listening on 8080"))
-
+})
+  
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`)
+})
 
 //TODO this function needs to be cleaned up, maybe made a seperate handel POST requests function
 //TODO need to clean up if staments to simplicity, potentially more pythonic methods
 async function handelGetRequests (parsedURL) {
-    console.log(parsedURL)
-    console.log(typeof(parsedURL))
     if (parsedURL === "/getTables"){
-        console.log("hello")
         temp = await getDatabase()
-        console.log(temp)
         return temp
     }
-    if (parsedURL === "/newLangauage"){
-        console.log("adding new language")
-        temp = await createLanguageDB("mynewDB") // TODO error handel this funciton call
-        return;
-    }
+
     if (parsedURL === "/add/phrase"){
-        console.log("this is the test")
         let body = [];
         request
         .on('data', chunk => {
@@ -70,7 +75,6 @@ async function handelGetRequests (parsedURL) {
             body = Buffer.concat(body).toString();
     // at this point, `body` has the entire request body stored in it as a string
         });
-        console.log('this is body', body)
         temp = await createPhrase("testnew", "native test", "target test") //TODO need to return a success/failure repsonse
         return
     }
@@ -116,5 +120,3 @@ async function createPhrase(table, native, target){
     await client.query("INSERT INTO " + table + " VALUES ('" + native + "','" + target + "');")
     client.release()
 }
-
-
