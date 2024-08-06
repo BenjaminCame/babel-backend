@@ -31,7 +31,6 @@ const pool = new Pool ({
 
 app.get('*', (req, res) => {
     const { headers, method, url } = req;
-    console.log('this is my url', url)
     handelGetRequests(url).then(response => {
         res.set(resheaders);
         res.json(response.rows)
@@ -44,17 +43,7 @@ app.get('*', (req, res) => {
 
 app.post('*', (req, res) => {
     const { headers, method, url } = req;
-    console.log('this is my post request')
-    let data = "";
-    console.log("this is my body", req.body)
-    // req.on('data', chunk => {
-      
-    //   data += chunk.toString();
-    //   console.log("this is my data", data)
-    // });
-
     if (url === "/newLangauage"){
-        console.log("adding new language")
         return createLanguageDB(req.body.newLanguage) // TODO error handel this funciton call
     }
 })
@@ -63,7 +52,6 @@ app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
 
-//TODO this function needs to be cleaned up, maybe made a seperate handel POST requests function
 //TODO need to clean up if staments to simplicity, potentially more pythonic methods
 async function handelGetRequests (parsedURL) {
     if (parsedURL === "/getTables"){
@@ -114,11 +102,8 @@ async function getTable(table){
 }   
 
 async function createLanguageDB(tablename){
-    console.log("this is my create language")
     client = await pool.connect()
-    console.log("CREATE TABLE " + tablename +  " ( native varchar(255), target varchar(255) );")
     res = await client.query("CREATE TABLE " + tablename +  " ( native varchar(255), target varchar(255) );")
-                            //CREATE TABLE tablename ( native varchar(255), target varchar(255) );
     console.log("hello", res)
     client.release()
 }  
