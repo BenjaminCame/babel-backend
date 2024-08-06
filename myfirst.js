@@ -1,11 +1,16 @@
 var pg = require('pg')
 const express = require('express')
 var cors = require('cors')
+var bodyParser = require('body-parser')
 const app = express()
 const port = 8080
 
 app.use(cors())
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
 
+// parse application/json
+app.use(bodyParser.json())
 const resheaders = {
             'Access-Control-Allow-Origin': 'http://localhost:4200', /* @dev First, read about security */
             'Access-Control-Allow-Methods': 'POST, GET, PUT',
@@ -40,16 +45,17 @@ app.get('*', (req, res) => {
 app.post('*', (req, res) => {
     const { headers, method, url } = req;
     console.log('this is my post request')
-    let data = '';
-    req.on('data', chunk => {
-      data += chunk.toString();
-    });
-
+    let data = "";
+    console.log("this is my body", req.body)
+    // req.on('data', chunk => {
+      
+    //   data += chunk.toString();
+    //   console.log("this is my data", data)
+    // });
 
     if (url === "/newLangauage"){
         console.log("adding new language")
-        //temp = await createLanguageDB("mynewDB") // TODO error handel this funciton call
-        return;
+        return createLanguageDB(req.body.newLanguage) // TODO error handel this funciton call
     }
 })
   
@@ -110,10 +116,12 @@ async function getTable(table){
 async function createLanguageDB(tablename){
     console.log("this is my create language")
     client = await pool.connect()
-    res = await client.query('CREATE TABLE ' + tablename +  "( native varchar(255), target varchar(255) );")
-    console.log(res)
+    console.log("CREATE TABLE " + tablename +  " ( native varchar(255), target varchar(255) );")
+    res = await client.query("CREATE TABLE " + tablename +  " ( native varchar(255), target varchar(255) );")
+                            //CREATE TABLE tablename ( native varchar(255), target varchar(255) );
+    console.log("hello", res)
     client.release()
-}
+}  
 
 async function createPhrase(table, native, target){
     client = await pool.connect()
