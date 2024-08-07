@@ -41,7 +41,8 @@ app.get('*', (req, res) => {
     })
 })
 
-app.post('*', (req, res) => {
+// TODO currently accepts all paths for post requests
+app.post('*', (req, res) => { 
     const { headers, method, url } = req;
     if (url === "/newLangauage"){
         return createLanguageDB(req.body.newLanguage) // TODO error handel this funciton call
@@ -54,11 +55,13 @@ app.listen(port, () => {
 
 //TODO need to clean up if staments to simplicity, potentially more pythonic methods
 async function handelGetRequests (parsedURL) {
+
+    splitURLList = parsedURL.toString().split("/")
+
     if (parsedURL === "/getTables"){
         temp = await getDatabase()
         return temp
     }
-
     if (parsedURL === "/add/phrase"){
         let body = [];
         request
@@ -72,18 +75,10 @@ async function handelGetRequests (parsedURL) {
         temp = await createPhrase("testnew", "native test", "target test") //TODO need to return a success/failure repsonse
         return
     }
-     //TODO this is working in the current form, but how can i dynamically add a table from the application
-    if (parsedURL === "/japanese"){
-        temp = await getTable("japanese")
-	    return temp
-    } else if(parsedURL === "/svenska"){
-        temp = await getTable("svenska")
+
+    if (splitURLList[1] === "getlanguagephrases"){
+        temp = await getTable(splitURLList[2])
         return temp
-    } else if(parsedURL === "/espanol"){
-        temp = await getTable("espanol")
-        return temp
-    } else {
-        console.log("nothing to see here!!")
     }
 }
 
