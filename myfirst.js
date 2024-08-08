@@ -44,9 +44,15 @@ app.get('*', (req, res) => {
 // TODO currently accepts all paths for post requests
 app.post('*', (req, res) => { 
     const { headers, method, url } = req;
-    if (url === "/newLangauage"){
-        return createLanguageDB(req.body.newLanguage) // TODO error handel this funciton call
-    }
+    console.log(url)
+    handelPostRequests(url,req).then(response => {
+        res.set(resheaders);
+        // res.json(response.rows)
+        res.end()
+    })
+    .catch(error => {
+        console.error('ERROR! ' + error)
+    })
 })
   
 app.listen(port, () => {
@@ -62,23 +68,23 @@ async function handelGetRequests (parsedURL) {
         temp = await getDatabase()
         return temp
     }
-    if (parsedURL === "/add/phrase"){
-        let body = [];
-        request
-        .on('data', chunk => {
-            body.push(chunk);
-        })
-        .on('end', () => {
-            body = Buffer.concat(body).toString();
-    // at this point, `body` has the entire request body stored in it as a string
-        });
-        temp = await createPhrase("testnew", "native test", "target test") //TODO need to return a success/failure repsonse
-        return
-    }
 
     if (splitURLList[1] === "getlanguagephrases"){
         temp = await getTable(splitURLList[2])
         return temp
+    }
+}
+
+async function handelPostRequests (url, req) {
+    console.log(url)
+    if (url === "/newLangauage"){
+        return createLanguageDB(req.body.newLanguage) // TODO error handel this funciton call
+    }
+
+    if (url === "/add/phrase"){
+        let body = req.body;
+        temp = await createPhrase(body.language, body.newNative, body.newTarget) //TODO need to return a success/failure repsonse
+        return
     }
 }
 
@@ -98,12 +104,13 @@ async function getTable(table){
 
 async function createLanguageDB(tablename){
     client = await pool.connect()
-    res = await client.query("CREATE TABLE " + tablename +  " ( native varchar(255), target varchar(255) );")
+    res = await client.query("CREATE TABLE " + tablename +  " (native varchar(255), target varchar(255));")
     console.log("hello", res)
     client.release()
 }  
 
 async function createPhrase(table, native, target){
+    console.log(table,native,target)
     client = await pool.connect()
     await client.query("INSERT INTO " + table + " VALUES ('" + native + "','" + target + "');")
     client.release()
