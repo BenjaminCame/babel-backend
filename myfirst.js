@@ -41,11 +41,18 @@ app.get('*', (req, res) => {
     })
 })
 
-app.post('*', (req, res) => {
+// TODO currently accepts all paths for post requests
+app.post('*', (req, res) => { 
     const { headers, method, url } = req;
-    if (url === "/newLangauage"){
-        return createLanguageDB(req.body.newLanguage) // TODO error handel this funciton call
-    }
+    console.log(url)
+    handelPostRequests(url,req).then(response => {
+        res.set(resheaders);
+        // res.json(response.rows)
+        res.end()
+    })
+    .catch(error => {
+        console.error('ERROR! ' + error)
+    })
 })
   
 app.listen(port, () => {
@@ -54,36 +61,30 @@ app.listen(port, () => {
 
 //TODO need to clean up if staments to simplicity, potentially more pythonic methods
 async function handelGetRequests (parsedURL) {
+
+    splitURLList = parsedURL.toString().split("/")
+
     if (parsedURL === "/getTables"){
         temp = await getDatabase()
         return temp
     }
 
-    if (parsedURL === "/add/phrase"){
-        let body = [];
-        request
-        .on('data', chunk => {
-            body.push(chunk);
-        })
-        .on('end', () => {
-            body = Buffer.concat(body).toString();
-    // at this point, `body` has the entire request body stored in it as a string
-        });
-        temp = await createPhrase("testnew", "native test", "target test") //TODO need to return a success/failure repsonse
-        return
+    if (splitURLList[1] === "getlanguagephrases"){
+        temp = await getTable(splitURLList[2])
+        return temp
     }
-     //TODO this is working in the current form, but how can i dynamically add a table from the application
-    if (parsedURL === "/japanese"){
-        temp = await getTable("japanese")
-	    return temp
-    } else if(parsedURL === "/svenska"){
-        temp = await getTable("svenska")
-        return temp
-    } else if(parsedURL === "/espanol"){
-        temp = await getTable("espanol")
-        return temp
-    } else {
-        console.log("nothing to see here!!")
+}
+
+async function handelPostRequests (url, req) {
+    console.log(url)
+    if (url === "/newLangauage"){
+        return createLanguageDB(req.body.newLanguage) // TODO error handel this funciton call
+    }
+
+    if (url === "/add/phrase"){
+        let body = req.body;
+        temp = await createPhrase(body.language, body.newNative, body.newTarget) //TODO need to return a success/failure repsonse
+        return
     }
 }
 
@@ -103,12 +104,13 @@ async function getTable(table){
 
 async function createLanguageDB(tablename){
     client = await pool.connect()
-    res = await client.query("CREATE TABLE " + tablename +  " ( native varchar(255), target varchar(255) );")
+    res = await client.query("CREATE TABLE " + tablename +  " (native varchar(255), target varchar(255));")
     console.log("hello", res)
     client.release()
 }  
 
 async function createPhrase(table, native, target){
+    console.log(table,native,target)
     client = await pool.connect()
     await client.query("INSERT INTO " + table + " VALUES ('" + native + "','" + target + "');")
     client.release()
