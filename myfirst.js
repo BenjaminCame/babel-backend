@@ -54,7 +54,17 @@ app.post('*', (req, res) => {
         console.error('ERROR! ' + error)
     })
 })
-  
+
+app.delete('*',(req,res) => {
+    const { headers, method, url } = req;
+    handelDeleteRequests(url,req).then(response => {
+        res.set(resheaders);
+        res.end()
+    })
+    .catch(error => {
+        console.error('ERROR! ' + error)
+    })
+})
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
@@ -74,6 +84,15 @@ async function handelGetRequests (parsedURL) {
         return temp
     }
 }
+
+async function handelDeleteRequests(url,req){
+    splitURLList = url.toString().split("/")
+    console.log(splitURLList)
+    if (splitURLList[1] === "deletelang"){
+        deleteLang(splitURLList[2])
+    }
+}
+
 
 async function handelPostRequests (url, req) {
     console.log(url)
@@ -113,5 +132,11 @@ async function createPhrase(table, native, target){
     console.log(table,native,target)
     client = await pool.connect()
     await client.query("INSERT INTO " + table + " VALUES ('" + native + "','" + target + "');")
+    client.release()
+}
+
+async function deleteLang(language){
+    client = await pool.connect()
+    await client.query("DROP TABLE " + language)
     client.release()
 }
