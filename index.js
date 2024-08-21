@@ -70,7 +70,7 @@ app.listen(port, () => {
 })
 
 //TODO need to clean up if staments to simplicity, potentially more pythonic methods
-async function handelGetRequests (parsedURL) {
+async function  handelGetRequests (parsedURL) {
 
     splitURLList = parsedURL.toString().split("/")
 
