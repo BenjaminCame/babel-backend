@@ -47,7 +47,7 @@ app.post('*', (req, res) => {
     console.log(url)
     handelPostRequests(url,req).then(response => {
         res.set(resheaders);
-        // res.json(response.rows)
+        res.json(response.rows)
         res.end()
     })
     .catch(error => {
@@ -73,13 +73,13 @@ app.listen(port, () => {
 async function  handelGetRequests (parsedURL) {
 
     splitURLList = parsedURL.toString().split("/")
-
-    if (parsedURL === "/getTables"){
+    if (parsedURL === "/getLanguages"){
         temp = await getDatabase()
         return temp
     }
-
-    if (splitURLList[1] === "getlanguagephrases"){
+    
+    if (splitURLList[1] === "getTables"){
+        console.log("testing")
         temp = await getTable(splitURLList[2])
         return temp
     }
@@ -87,7 +87,6 @@ async function  handelGetRequests (parsedURL) {
 
 async function handelDeleteRequests(url,req){
     splitURLList = url.toString().split("/")
-    console.log(splitURLList)
     if (splitURLList[1] === "deletelang"){
         deleteLang(splitURLList[2])
     }
